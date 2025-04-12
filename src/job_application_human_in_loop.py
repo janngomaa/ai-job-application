@@ -2,6 +2,7 @@ import os
 import asyncio
 import json
 from src.helper.logger import get_logger
+from src.helper.helper import get_openai_api_key, get_llama_cloud_api_key
 from llama_index.core.workflow import (
     StartEvent,
     StopEvent,
@@ -20,6 +21,8 @@ from llama_index.core.storage.storage_context import StorageContext
 from llama_parse import LlamaParse
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
+
+from llama_index.utils.workflow import draw_all_possible_flows
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -61,7 +64,13 @@ class RAGWorkflow(Workflow):
             raise ValueError("No application form provided")
 
         self.logger.log_step("Initializing LLM")
-        self.llm = OpenAI(model="gpt-4o-mini")
+        openai_api_key = get_openai_api_key()
+        
+        self.llm = OpenAI(
+            model="gpt-4o-mini", 
+            api_key=openai_api_key,
+            temperature=0.3
+        )
 
         if os.path.exists(self.storage_dir):
             self.logger.log_step("Loading existing index from storage")
@@ -69,9 +78,12 @@ class RAGWorkflow(Workflow):
             index = load_index_from_storage(storage_context)
         else:
             self.logger.log_step("Creating new index from resume")
+            llama_cloud_api_key = get_llama_cloud_api_key()
+            
             documents = LlamaParse(
+                api_key=llama_cloud_api_key,
                 result_type="markdown",
-                content_guideline_instruction="This is a resume, gather related facts together and format it as bullet points with headers"
+                user_prompt="This is a resume, gather related facts together and format it as bullet points with headers"
             ).load_data(ev.resume_file)
             
             self.logger.debug("Embedding and indexing documents")
@@ -91,7 +103,10 @@ class RAGWorkflow(Workflow):
     @step
     async def parse_form(self, ctx: Context, ev: ParseFormEvent) -> GenerateQuestionsEvent:
         self.logger.log_step("Starting form parsing")
+        llama_cloud_api_key = get_llama_cloud_api_key()
+        
         parser = LlamaParse(
+            api_key=llama_cloud_api_key,
             result_type="markdown",
             content_guideline_instruction="This is a job application form. Create a list of all the fields that need to be filled in.",
             user_prompt="Return a bulleted list of the fields ONLY."
@@ -217,6 +232,12 @@ async def main():
     logger.log_step("Starting job application workflow")
     try:
         workflow = RAGWorkflow(timeout=600, verbose=False)
+
+        #draw_all_possible_flows(
+        #    workflow, 
+        #    filename="workflows/job_application_human_in_loop.html"
+        #)
+
         handler = workflow.run(
             resume_file="./data/fake_resume.pdf",
             application_form="./data/rc126-10b.pdf"
