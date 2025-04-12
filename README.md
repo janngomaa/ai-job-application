@@ -1,72 +1,114 @@
-# AI-Powered Job Application Assistant
+# AI Job Application Assistant
 
-An intelligent job application assistant that helps automate the process of filling out job applications using a candidate's resume. Built with LlamaIndex and OpenAI.
+An intelligent application that helps users fill out job application forms using their resume. The application uses LLM-powered workflows to automate form filling while allowing human feedback and corrections.
 
 ## Features
 
-- Automatic form field detection and parsing
-- Resume analysis and information extraction
-- Read job application form
-- Fill in application form
-- Interactive feedback (human-in-the-loop) and refinement
-- Daily log rotation for better log management
+- **Resume & Form Upload**: Upload your resume and job application form in PDF or DOCX format
+- **Intelligent Form Filling**: Automatically extracts information from your resume to fill out job application forms
+- **Human-in-the-Loop**: Review and provide feedback on the generated responses
+- **Modern UI**: Clean and intuitive interface built with Streamlit
+- **Robust Backend**: FastAPI backend with async support and proper error handling
 
-## Requirements
+## Architecture
 
-- Python 3.10+
-- OpenAI API key
-- LlamaIndex
-- Other dependencies (see requirements.txt)
+The application follows a client-server architecture:
+
+- **Frontend**: Streamlit application providing the user interface
+- **Backend**: FastAPI server handling file processing and workflow management
+- **Workflow Engine**: Custom RAG (Retrieval-Augmented Generation) workflow using LlamaIndex
+
+## Prerequisites
+
+- Python 3.10 or higher
+- uv package manager
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/janngomaa/ai-job-application.git
+cd ai-job-application
+```
+
+2. Create and activate a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+```
+
+3. Install dependencies using uv:
+```bash
+uv pip install -r requirements.txt
+```
+
+## Configuration
+
+1. Set up your environment variables:
+```bash
+export LLAMA_CLOUD_API_KEY=your_api_key_here
+```
+
+2. Create a `data` directory for file storage:
+```bash
+mkdir data
+```
+
+## Running the Application
+
+1. Start the FastAPI backend:
+```bash
+uvicorn src.backend.api:app --reload
+```
+
+2. In a new terminal, start the Streamlit frontend:
+```bash
+streamlit run src/streamlit/app.py
+```
+
+3. Open your browser and navigate to http://localhost:8501
+
+## Usage
+
+1. Upload your resume (PDF or DOCX)
+2. Upload the job application form (PDF or DOCX)
+3. Click "Process Files" to start the automated form filling
+4. Review the generated responses
+5. Provide feedback if needed
+6. Submit your feedback to improve the responses
 
 ## Project Structure
 
 ```
-llamaindex/
+ai-job-application/
+├── data/                  # Storage for uploaded files
 ├── src/
-│   ├── helper/
-│   │   ├── __init__.py
-│   │   └── logger.py
-│   └── job_application_human_in_loop.py
-├── data/
-│   ├── fake_resume.pdf
-│   └── rc126-10b.pdf
-├── logs/
-└── storage/
+│   ├── backend/          # FastAPI backend
+│   │   └── api.py       # API endpoints
+│   ├── streamlit/        # Streamlit frontend
+│   │   └── app.py       # UI implementation
+│   ├── helper/          # Helper functions
+│   └── job_application_human_in_loop.py  # Core workflow
+├── requirements.txt      # Project dependencies
+└── README.md            # Documentation
 ```
 
-## Setup
+## Error Handling
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Set up your environment variables:
-   ```bash
-   export OPENAI_API_KEY=your_api_key_here
-   ```
+The application includes comprehensive error handling:
+- File upload validation
+- Backend processing errors
+- Network communication errors
+- Workflow state management
 
-## Usage
+## Contributing
 
-Run the job application assistant:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```bash
-python -m src.job_application_human_in_loop
-```
+## License
 
-The system will:
-1. Parse the provided resume
-2. Analyze the job application form
-3. Generate appropriate responses
-4. Allow for human feedback and refinement
-5. Produce a completed application
-
-## Logging
-
-The system uses a custom logging framework that:
-- Automatically detects and logs function names
-- Rotates logs daily
-- Supports multiple log levels
-- Provides both file and console output
-
-Logs are stored in the `logs/` directory with the naming format: `app_name_YYYYMMDD.log`
+This project is licensed under the MIT License - see the LICENSE file for details.
