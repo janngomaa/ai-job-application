@@ -47,6 +47,7 @@ uv pip install -r requirements.txt
 1. Set up your environment variables:
 ```bash
 export LLAMA_CLOUD_API_KEY=your_api_key_here
+export OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 2. Create a `data` directory for file storage:
